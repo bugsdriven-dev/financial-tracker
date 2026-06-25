@@ -7,14 +7,12 @@ import { useAuth } from '../context/AuthContext';
 function AdminPanel() {
     const { user } = useAuth();
     const navigate = useNavigate();
-
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // If not admin, redirect to dashboard
         if (user?.role !== 'admin') {
             navigate('/dashboard');
             return;
@@ -31,7 +29,7 @@ function AdminPanel() {
             setStats(statsRes.data);
             setUsers(usersRes.data);
         } catch (err) {
-            setError('Failed to load admin data. Make sure you are logged in as admin.');
+            setError('Failed to load admin data.');
         } finally {
             setLoading(false);
         }
@@ -39,7 +37,6 @@ function AdminPanel() {
 
     const handleDeleteUser = async (id, name) => {
         if (!window.confirm(`Are you sure you want to delete ${name}?`)) return;
-
         try {
             await API.delete(`/admin/users/${id}`);
             setUsers(users.filter(u => u._id !== id));
@@ -48,128 +45,139 @@ function AdminPanel() {
         }
     };
 
+    const statCards = stats ? [
+        { label: 'Total Users', value: stats.totalUsers, icon: '👥', color: 'from-blue-400 to-indigo-500' },
+        { label: 'New This Week', value: stats.newUsersThisWeek, icon: '🆕', color: 'from-green-400 to-emerald-500' },
+        { label: 'Transactions', value: stats.totalTransactions, icon: '💳', color: 'from-purple-400 to-violet-500' },
+        { label: 'Habits Tracked', value: stats.totalHabits, icon: '🔥', color: 'from-orange-400 to-amber-500' },
+        { label: 'Goals Set', value: stats.totalGoals, icon: '🎯', color: 'from-pink-400 to-rose-500' },
+        { label: 'Platform Income', value: `₹${stats.totalIncomeAcrossPlatform?.toLocaleString()}`, icon: '📈', color: 'from-teal-400 to-cyan-500' },
+        { label: 'Platform Expense', value: `₹${stats.totalExpenseAcrossPlatform?.toLocaleString()}`, icon: '📉', color: 'from-red-400 to-rose-500' },
+        { label: 'Net Savings', value: `₹${(stats.totalIncomeAcrossPlatform - stats.totalExpenseAcrossPlatform)?.toLocaleString()}`, icon: '💰', color: 'from-indigo-400 to-purple-500' },
+    ] : [];
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-gray-500">Loading admin panel...</p>
+            <div className="min-h-screen bg-[#F0F4FF]">
+                <Navbar />
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-500 font-medium">Loading admin panel...</p>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#F0F4FF]">
             <Navbar />
+            <div className="max-w-7xl mx-auto px-6 py-8">
 
-            <div className="p-6 max-w-6xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-800 mb-1">
-                    Admin Panel 👑
-                </h2>
-                <p className="text-gray-500 mb-6">Platform overview and user management</p>
+                {/* Header */}
+                <div className="mb-8 animate-fadeInUp">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                            👑
+                        </div>
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-800">Admin Panel</h2>
+                            <p className="text-gray-500">Platform overview and user management</p>
+                        </div>
+                    </div>
+                </div>
 
                 {error && (
-                    <div className="bg-red-100 text-red-600 p-3 rounded mb-4">
-                        {error}
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 text-sm">
+                        ⚠️ {error}
                     </div>
                 )}
 
-                {/* Stats Cards */}
-                {stats && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-blue-500">
-                            <p className="text-gray-500 text-sm">Total Users</p>
-                            <p className="text-2xl font-bold text-blue-600">{stats.totalUsers}</p>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                    {statCards.map((card, i) => (
+                        <div
+                            key={card.label}
+                            className={`bg-gradient-to-br ${card.color} rounded-2xl p-5 text-white shadow-lg card-hover animate-fadeInUp`}
+                            style={{ animationDelay: `${i * 0.06}s` }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-white/80 text-xs font-medium">{card.label}</p>
+                                <span className="text-xl">{card.icon}</span>
+                            </div>
+                            <p className="text-2xl font-bold">{card.value}</p>
                         </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-green-500">
-                            <p className="text-gray-500 text-sm">New This Week</p>
-                            <p className="text-2xl font-bold text-green-600">{stats.newUsersThisWeek}</p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-purple-500">
-                            <p className="text-gray-500 text-sm">Total Transactions</p>
-                            <p className="text-2xl font-bold text-purple-600">{stats.totalTransactions}</p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-orange-500">
-                            <p className="text-gray-500 text-sm">Total Habits</p>
-                            <p className="text-2xl font-bold text-orange-600">{stats.totalHabits}</p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-pink-500">
-                            <p className="text-gray-500 text-sm">Total Goals</p>
-                            <p className="text-2xl font-bold text-pink-600">{stats.totalGoals}</p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-teal-500">
-                            <p className="text-gray-500 text-sm">Platform Income</p>
-                            <p className="text-2xl font-bold text-teal-600">
-                                ₹{stats.totalIncomeAcrossPlatform?.toLocaleString()}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-red-500">
-                            <p className="text-gray-500 text-sm">Platform Expense</p>
-                            <p className="text-2xl font-bold text-red-600">
-                                ₹{stats.totalExpenseAcrossPlatform?.toLocaleString()}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-gray-500">
-                            <p className="text-gray-500 text-sm">Net Savings</p>
-                            <p className="text-2xl font-bold text-gray-700">
-                                ₹{(stats.totalIncomeAcrossPlatform - stats.totalExpenseAcrossPlatform)?.toLocaleString()}
-                            </p>
-                        </div>
-                    </div>
-                )}
+                    ))}
+                </div>
 
                 {/* Users Table */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div className="p-6 border-b">
-                        <h3 className="font-semibold text-gray-800">All Registered Users</h3>
-                        <p className="text-sm text-gray-400 mt-1">{users.length} users total</p>
+                <div className="bg-white rounded-2xl shadow-sm border border-indigo-50 overflow-hidden animate-fadeInUp delay-4">
+                    <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-bold text-gray-800 text-lg">All Registered Users</h3>
+                            <p className="text-sm text-gray-400 mt-0.5">{users.length} users on the platform</p>
+                        </div>
+                        <div className="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-sm font-semibold">
+                            {users.length} Total
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Name</th>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Email</th>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Role</th>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Monthly Income</th>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Joined</th>
-                                    <th className="text-left p-4 text-sm font-medium text-gray-500">Action</th>
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-100">
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Monthly Income</th>
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
+                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y">
-                                {users.map((u) => (
-                                    <tr key={u._id} className="hover:bg-gray-50">
-                                        <td className="p-4 font-medium text-gray-800">{u.name}</td>
-                                        <td className="p-4 text-gray-600">{u.email}</td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            <tbody className="divide-y divide-gray-50">
+                                {users.map((u, i) => (
+                                    <tr
+                                        key={u._id}
+                                        className="hover:bg-indigo-50/30 transition-all animate-fadeInUp"
+                                        style={{ animationDelay: `${i * 0.05}s` }}
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                                                    {u.name?.charAt(0).toUpperCase()}
+                                                </div>
+                                                <span className="font-semibold text-gray-800">{u.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-500 text-sm">{u.email}</td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                                 u.role === 'admin'
-                                                    ? 'bg-purple-100 text-purple-600'
-                                                    : 'bg-gray-100 text-gray-600'
+                                                    ? 'bg-purple-100 text-purple-700'
+                                                    : 'bg-indigo-50 text-indigo-600'
                                             }`}>
-                                                {u.role}
+                                                {u.role === 'admin' ? '👑 Admin' : '👤 User'}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-gray-600">
+                                        <td className="px-6 py-4 font-semibold text-gray-700">
                                             ₹{u.monthlyIncome?.toLocaleString()}
                                         </td>
-                                        <td className="p-4 text-gray-400 text-sm">
-                                            {new Date(u.createdAt).toLocaleDateString()}
+                                        <td className="px-6 py-4 text-gray-400 text-sm">
+                                            {new Date(u.createdAt).toLocaleDateString('en-IN', {
+                                                day: 'numeric', month: 'short', year: 'numeric'
+                                            })}
                                         </td>
-                                        <td className="p-4">
-                                            {u.role !== 'admin' && (
+                                        <td className="px-6 py-4">
+                                            {u.role !== 'admin' ? (
                                                 <button
                                                     onClick={() => handleDeleteUser(u._id, u.name)}
-                                                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                                    className="bg-red-50 text-red-500 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                                                 >
-                                                    Delete
+                                                    🗑️ Delete
                                                 </button>
+                                            ) : (
+                                                <span className="text-gray-300 text-xs">Protected</span>
                                             )}
                                         </td>
                                     </tr>

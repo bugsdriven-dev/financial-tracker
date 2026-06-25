@@ -6,15 +6,12 @@ function Habits() {
     const [habits, setHabits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-
     const [name, setName] = useState('');
     const [frequency, setFrequency] = useState('daily');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
 
-    useEffect(() => {
-        fetchHabits();
-    }, []);
+    useEffect(() => { fetchHabits(); }, []);
 
     const fetchHabits = async () => {
         try {
@@ -30,11 +27,9 @@ function Habits() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-
         try {
             await API.post('/habits', { name, frequency });
-            setName('');
-            setFrequency('daily');
+            setName(''); setFrequency('daily');
             setShowForm(false);
             fetchHabits();
         } catch (err) {
@@ -47,9 +42,11 @@ function Habits() {
         try {
             const res = await API.put(`/habits/${id}/complete`);
             setMessage(res.data.message);
-            fetchHabits(); // refresh to show updated streak
+            fetchHabits();
+            setTimeout(() => setMessage(''), 3000);
         } catch (err) {
-            setMessage(err.response?.data?.message || 'Error completing habit');
+            setMessage(err.response?.data?.message || 'Error');
+            setTimeout(() => setMessage(''), 3000);
         }
     };
 
@@ -57,38 +54,48 @@ function Habits() {
         try {
             await API.delete(`/habits/${id}`);
             fetchHabits();
-        } catch (err) {
-            console.log(err);
-        }
+        } catch (err) { console.log(err); }
+    };
+
+    const frequencyColors = {
+        daily: 'bg-blue-100 text-blue-600',
+        weekly: 'bg-purple-100 text-purple-600',
+        monthly: 'bg-green-100 text-green-600'
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#F0F4FF]">
             <Navbar />
+            <div className="max-w-4xl mx-auto px-6 py-8">
 
-            <div className="p-6 max-w-4xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Financial Habits 🔥</h2>
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6 animate-fadeInUp">
+                    <div>
+                        <h2 className="text-3xl font-bold text-gray-800">Financial Habits</h2>
+                        <p className="text-gray-500 mt-1">Build consistent money habits daily</p>
+                    </div>
                     <button
                         onClick={() => setShowForm(!showForm)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg btn-primary"
                     >
-                        {showForm ? 'Cancel' : '+ Add Habit'}
+                        {showForm ? '✕ Cancel' : '+ Add Habit'}
                     </button>
                 </div>
 
+                {/* Message Toast */}
                 {message && (
-                    <div className="bg-blue-100 text-blue-700 p-3 rounded-lg mb-4 text-sm">
-                        {message}
+                    <div className="bg-gradient-to-r from-orange-400 to-amber-500 text-white px-5 py-3 rounded-xl mb-5 text-sm font-medium shadow-md animate-scaleIn flex items-center gap-2">
+                        🔥 {message}
                     </div>
                 )}
 
-                {/* Add Habit Form */}
+                {/* Add Form */}
                 {showForm && (
-                    <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-indigo-50 mb-6 animate-scaleIn">
+                        <h3 className="font-bold text-gray-800 mb-4">Create New Habit</h3>
                         {error && (
-                            <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm">
-                                {error}
+                            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-4 text-sm">
+                                ⚠️ {error}
                             </div>
                         )}
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,68 +103,81 @@ function Habits() {
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Save ₹100 daily, Track expenses"
+                                placeholder="e.g. Save ₹100 daily, Track expenses every night"
                                 required
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 hover:bg-white transition-all"
                             />
-
-                            <select
-                                value={frequency}
-                                onChange={(e) => setFrequency(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-
+                            <div className="flex gap-3">
+                                {['daily', 'weekly', 'monthly'].map((freq) => (
+                                    <button
+                                        key={freq}
+                                        type="button"
+                                        onClick={() => setFrequency(freq)}
+                                        className={`flex-1 py-2.5 rounded-xl font-medium capitalize transition-all ${
+                                            frequency === freq
+                                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md'
+                                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {freq}
+                                    </button>
+                                ))}
+                            </div>
                             <button
                                 type="submit"
-                                className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700"
+                                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md btn-primary"
                             >
-                                Add Habit
+                                Create Habit 🔥
                             </button>
                         </form>
                     </div>
                 )}
 
-                {/* Habits List */}
+                {/* Habits Grid */}
                 {loading ? (
-                    <p className="text-gray-500 text-center">Loading...</p>
+                    <div className="flex items-center justify-center py-16">
+                        <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 ) : habits.length === 0 ? (
-                    <div className="bg-white rounded-xl p-8 shadow-sm text-center">
-                        <p className="text-gray-400">No habits yet. Add your first financial habit!</p>
+                    <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-indigo-50">
+                        <p className="text-5xl mb-3">🌱</p>
+                        <p className="text-gray-500 font-medium">No habits yet. Start building your first one!</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {habits.map((habit) => (
-                            <div key={habit._id} className="bg-white rounded-xl p-5 shadow-sm">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                        <h3 className="font-semibold text-gray-800">{habit.name}</h3>
-                                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full capitalize">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {habits.map((habit, i) => (
+                            <div
+                                key={habit._id}
+                                className="bg-white rounded-2xl p-5 shadow-sm border border-indigo-50 card-hover animate-fadeInUp"
+                                style={{ animationDelay: `${i * 0.08}s` }}
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex-1">
+                                        <h3 className="font-bold text-gray-800 mb-2">{habit.name}</h3>
+                                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${frequencyColors[habit.frequency]}`}>
                                             {habit.frequency}
                                         </span>
                                     </div>
                                     <button
                                         onClick={() => handleDelete(habit._id)}
-                                        className="text-gray-400 hover:text-red-500 text-sm"
+                                        className="text-gray-300 hover:text-red-400 transition-colors ml-2"
                                     >
-                                        Delete
+                                        🗑️
                                     </button>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-4">
-                                    <span className="text-orange-500 font-bold text-lg">
-                                        🔥 {habit.streak} day streak
-                                    </span>
-                                    <button
-                                        onClick={() => handleComplete(habit._id)}
-                                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700"
-                                    >
-                                        Mark Done Today ✅
-                                    </button>
+                                {/* Streak */}
+                                <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-3 mb-4 flex items-center justify-between border border-orange-100">
+                                    <span className="text-gray-600 text-sm font-medium">Current Streak</span>
+                                    <span className="text-orange-500 font-bold text-lg">🔥 {habit.streak} days</span>
                                 </div>
+
+                                <button
+                                    onClick={() => handleComplete(habit._id)}
+                                    className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white py-2.5 rounded-xl font-semibold hover:from-green-500 hover:to-emerald-600 transition-all shadow-sm btn-primary"
+                                >
+                                    ✅ Mark Done Today
+                                </button>
                             </div>
                         ))}
                     </div>

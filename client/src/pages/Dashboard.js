@@ -26,7 +26,6 @@ function Dashboard() {
             setSummary(summaryRes.data);
             setHabits(habitsRes.data);
             setGoals(goalsRes.data);
-
             const investTotal = investmentsRes.data.reduce((sum, inv) => sum + inv.amount, 0);
             setTotalInvestments(investTotal);
         } catch (err) {
@@ -36,99 +35,130 @@ function Dashboard() {
         }
     };
 
+    const netWorth = summary.balance + totalInvestments;
+
+    const cards = [
+        { label: 'Total Income', value: summary.totalIncome, color: 'from-green-400 to-emerald-500', icon: '📈', delay: 'delay-1' },
+        { label: 'Total Expense', value: summary.totalExpense, color: 'from-red-400 to-rose-500', icon: '📉', delay: 'delay-2' },
+        { label: 'Investments', value: totalInvestments, color: 'from-purple-400 to-violet-500', icon: '💹', delay: 'delay-3' },
+        { label: 'Net Worth', value: netWorth, color: 'from-indigo-400 to-blue-500', icon: '🏆', delay: 'delay-4' },
+    ];
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-gray-500">Loading dashboard...</p>
+            <div className="min-h-screen bg-[#F0F4FF]">
+                <Navbar />
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-500 font-medium">Loading your dashboard...</p>
+                    </div>
+                </div>
             </div>
         );
     }
 
-    // Net Worth = Balance (savings) + Investments
-    const netWorth = summary.balance + totalInvestments;
-
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#F0F4FF]">
             <Navbar />
 
-            <div className="p-6 max-w-6xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-800 mb-1">
-                    Welcome back, {user?.name}! 👋
-                </h2>
-                <p className="text-gray-500 mb-6">Here's your financial overview</p>
+            <div className="max-w-7xl mx-auto px-6 py-8">
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-green-500">
-                        <p className="text-gray-500 text-sm">Total Income</p>
-                        <p className="text-2xl font-bold text-green-600">
-                            ₹{summary.totalIncome.toLocaleString()}
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-red-500">
-                        <p className="text-gray-500 text-sm">Total Expense</p>
-                        <p className="text-2xl font-bold text-red-600">
-                            ₹{summary.totalExpense.toLocaleString()}
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-purple-500">
-                        <p className="text-gray-500 text-sm">Investments</p>
-                        <p className="text-2xl font-bold text-purple-600">
-                            ₹{totalInvestments.toLocaleString()}
-                        </p>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-blue-500">
-                        <p className="text-gray-500 text-sm">Net Worth</p>
-                        <p className="text-2xl font-bold text-blue-600">
-                            ₹{netWorth.toLocaleString()}
-                        </p>
-                    </div>
+                {/* Header */}
+                <div className="mb-8 animate-fadeInUp">
+                    <h2 className="text-3xl font-bold text-gray-800">
+                        Welcome back, <span className="text-indigo-600">{user?.name?.split(' ')[0]}</span>! 👋
+                    </h2>
+                    <p className="text-gray-500 mt-1">Here's your financial overview for today</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Habits Summary */}
-                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                        <h3 className="font-semibold text-gray-800 mb-4">🔥 Active Habits</h3>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                    {cards.map((card) => (
+                        <div
+                            key={card.label}
+                            className={`bg-gradient-to-br ${card.color} rounded-2xl p-6 text-white shadow-lg card-hover animate-fadeInUp ${card.delay}`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-white/80 text-sm font-medium">{card.label}</p>
+                                <span className="text-2xl">{card.icon}</span>
+                            </div>
+                            <p className="text-3xl font-bold">
+                                ₹{card.value.toLocaleString()}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Bottom Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    {/* Habits */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-indigo-50 animate-fadeInUp delay-3">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-lg font-bold text-gray-800">🔥 Active Habits</h3>
+                            <span className="text-xs bg-orange-50 text-orange-500 px-2 py-1 rounded-full font-medium">
+                                {habits.length} active
+                            </span>
+                        </div>
                         {habits.length === 0 ? (
-                            <p className="text-gray-400 text-sm">No habits yet. Add one to get started!</p>
+                            <div className="text-center py-8">
+                                <p className="text-4xl mb-2">🌱</p>
+                                <p className="text-gray-400 text-sm">No habits yet. Start building one!</p>
+                            </div>
                         ) : (
                             <div className="space-y-3">
-                                {habits.map((habit) => (
-                                    <div key={habit._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                                        <span className="text-gray-700">{habit.name}</span>
-                                        <span className="text-orange-500 font-medium">🔥 {habit.streak} days</span>
+                                {habits.slice(0, 4).map((habit) => (
+                                    <div key={habit._id} className="flex items-center justify-between bg-gradient-to-r from-orange-50 to-amber-50 p-3 rounded-xl border border-orange-100">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-sm">
+                                                🔥
+                                            </div>
+                                            <span className="text-gray-700 font-medium text-sm">{habit.name}</span>
+                                        </div>
+                                        <span className="text-orange-500 font-bold text-sm bg-white px-2 py-1 rounded-lg shadow-sm">
+                                            {habit.streak} days
+                                        </span>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
 
-                    {/* Goals Summary */}
-                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                        <h3 className="font-semibold text-gray-800 mb-4">🎯 Savings Goals</h3>
+                    {/* Goals */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-indigo-50 animate-fadeInUp delay-4">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-lg font-bold text-gray-800">🎯 Savings Goals</h3>
+                            <span className="text-xs bg-indigo-50 text-indigo-500 px-2 py-1 rounded-full font-medium">
+                                {goals.length} goals
+                            </span>
+                        </div>
                         {goals.length === 0 ? (
-                            <p className="text-gray-400 text-sm">No goals yet. Set one to start saving!</p>
+                            <div className="text-center py-8">
+                                <p className="text-4xl mb-2">🎯</p>
+                                <p className="text-gray-400 text-sm">No goals yet. Set your first goal!</p>
+                            </div>
                         ) : (
                             <div className="space-y-4">
-                                {goals.map((goal) => {
+                                {goals.slice(0, 3).map((goal) => {
                                     const percent = Math.min(
-                                        Math.round((goal.savedAmount / goal.targetAmount) * 100),
-                                        100
+                                        Math.round((goal.savedAmount / goal.targetAmount) * 100), 100
                                     );
                                     return (
                                         <div key={goal._id}>
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span className="text-gray-700">{goal.name}</span>
-                                                <span className="text-gray-500">{percent}%</span>
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span className="text-gray-700 font-medium">{goal.name}</span>
+                                                <span className="text-indigo-600 font-bold">{percent}%</span>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="w-full bg-indigo-50 rounded-full h-2.5">
                                                 <div
-                                                    className="bg-blue-600 h-2 rounded-full"
+                                                    className="bg-gradient-to-r from-indigo-400 to-purple-500 h-2.5 rounded-full transition-all duration-700"
                                                     style={{ width: `${percent}%` }}
                                                 ></div>
+                                            </div>
+                                            <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>₹{goal.savedAmount.toLocaleString()} saved</span>
+                                                <span>₹{goal.targetAmount.toLocaleString()} goal</span>
                                             </div>
                                         </div>
                                     );
