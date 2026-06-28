@@ -1,102 +1,79 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import Tilt from 'react-parallax-tilt';
 import API from '../api/axios';
 
 function ForgotPassword() {
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
+    const [email, setEmail]     = useState('');
+    const [error, setError]     = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-        setLoading(true);
-        try {
-            const res = await API.post('/auth/forgot-password', { email });
-            setSuccess(res.data.message);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Something went wrong');
-        } finally {
-            setLoading(false);
-        }
+        e.preventDefault(); setError(''); setSuccess(''); setLoading(true);
+        try { const res = await API.post('/auth/forgot-password', { email }); setSuccess(res.data.message); }
+        catch (err) { setError(err.response?.data?.message || 'Something went wrong'); }
+        finally { setLoading(false); }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center px-4" style={{ background:'var(--bg)' }}>
+            <div className="grid-bg" />
+            <motion.div animate={{ y:[0,-18,0] }} transition={{ duration:7, repeat:Infinity }}
+                className="orb w-80 h-80" style={{ top:-80, left:-80, background:'rgba(99,102,241,0.28)' }} />
+            <motion.div animate={{ y:[0,16,0] }} transition={{ duration:9, repeat:Infinity, delay:1 }}
+                className="orb w-72 h-72" style={{ bottom:-60, right:-60, background:'rgba(168,85,247,0.22)' }} />
 
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-10 left-10 w-64 h-64 bg-indigo-100 rounded-full opacity-40 blur-3xl"></div>
-                <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-100 rounded-full opacity-40 blur-3xl"></div>
-            </div>
-
-            <div className="w-full max-w-md animate-fadeInUp">
-
-                <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg">
-                        🔑
-                    </div>
-                    <h1 className="text-3xl font-bold text-gray-800">Forgot Password?</h1>
-                    <p className="text-gray-500 mt-1">We'll send a reset link to your email</p>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-xl border border-indigo-50 p-8">
-
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-5 text-sm flex items-center gap-2 animate-fadeIn">
-                            <span>⚠️</span> {error}
+            <div className="w-full max-w-md relative z-10">
+                <motion.div initial={{ opacity:0, y:-30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6 }} className="text-center mb-8">
+                    <Tilt tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.06} className="inline-block mb-5">
+                        <div className="w-[72px] h-[72px] rounded-3xl flex items-center justify-center text-3xl mx-auto relative"
+                            style={{ background:'linear-gradient(135deg,#6366f1,#a855f7)', boxShadow:'0 0 50px rgba(99,102,241,0.5)' }}>
+                            🔑
+                            <div className="absolute inset-0 rounded-3xl border border-indigo-400/30 spin-slow" />
                         </div>
-                    )}
+                    </Tilt>
+                    <h1 className="text-4xl font-black text-white mb-2" style={{ fontFamily:'Syne,sans-serif' }}>Forgot Password?</h1>
+                    <p className="text-gray-500 font-medium">No worries — we'll send a reset link</p>
+                </motion.div>
 
-                    {success && (
-                        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-5 text-sm flex items-center gap-2 animate-fadeIn">
-                            <span>✅</span> {success}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Registered Email Address
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">📧</span>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all bg-gray-50 hover:bg-white"
-                                    placeholder="you@example.com"
-                                />
+                <Tilt tiltMaxAngleX={4} tiltMaxAngleY={4} glareEnable glareMaxOpacity={0.06} scale={1.01}>
+                    <motion.div initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6, delay:0.15 }}
+                        className="glass-bright rounded-3xl p-8 shadow-2xl">
+                        {error && (
+                            <motion.div initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} className="mb-5 px-4 py-3 rounded-xl text-sm"
+                                style={{ background:'rgba(244,63,94,0.12)', border:'1px solid rgba(244,63,94,0.3)', color:'#fb7185' }}>⚠ {error}</motion.div>
+                        )}
+                        {success && (
+                            <motion.div initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} className="mb-5 px-4 py-3 rounded-xl text-sm"
+                                style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.3)', color:'#34d399' }}>✓ {success}</motion.div>
+                        )}
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label className="block section-eyebrow mb-2">Registered Email</label>
+                                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required
+                                    placeholder="you@example.com" className="neo-input" />
                             </div>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-60 btn-primary"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                    </svg>
-                                    Sending...
-                                </span>
-                            ) : 'Send Reset Link →'}
-                        </button>
-                    </form>
-
-                    <p className="text-center text-sm text-gray-500 mt-6">
-                        Remember your password?{' '}
-                        <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
-                            Back to Login
-                        </Link>
-                    </p>
-                </div>
+                            <motion.button type="submit" disabled={loading}
+                                whileHover={{ scale:loading?1:1.02 }} whileTap={{ scale:loading?1:0.97 }}
+                                className="btn-neon w-full py-4 font-bold text-base">
+                                {loading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <motion.span animate={{ rotate:360 }} transition={{ duration:1, repeat:Infinity, ease:'linear' }}
+                                            className="inline-block w-4 h-4 rounded-full border-2 border-white/30 border-t-white" />
+                                        Sending...
+                                    </span>
+                                ) : 'Send Reset Link →'}
+                            </motion.button>
+                        </form>
+                        <div className="divider my-6" />
+                        <p className="text-center text-sm text-gray-500">
+                            Remember it?{' '}
+                            <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">Back to Login</Link>
+                        </p>
+                    </motion.div>
+                </Tilt>
             </div>
         </div>
     );
