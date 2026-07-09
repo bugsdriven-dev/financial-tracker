@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // This creates a connection to our backend
+
 const API = axios.create({
-    baseURL: 'http://localhost:5000/api'
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
 });
 
 // This automatically adds the login token to every request
@@ -15,3 +16,4 @@ API.interceptors.request.use((req) => {
 });
 
 export default API;
+
