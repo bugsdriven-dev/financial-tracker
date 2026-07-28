@@ -60,9 +60,7 @@ financial-tracker/
    npm start
    ```
 
-## 🎥 Demo
 
-Watch the full walkthrough here: [Demo Video](https://drive.google.com/file/d/1NNkXATytO95T5FN35Qukug5xFzaEgur8/view?usp=sharing)
 
 ## 🔗 Links
 
