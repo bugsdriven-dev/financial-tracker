@@ -62,12 +62,7 @@ financial-tracker/
 
 
 
-## 🔗 Links
 
-- **Live App:** [financial-tracker-pi-ochre.vercel.app](https://financial-tracker-pi-ochre.vercel.app)
-- **Repository:** [github.com/bugsdriven-dev/financial-tracker](https://github.com/bugsdriven-dev/financial-tracker)
-
----
 
 <div align="center">
 Built by <a href="https://github.com/bugsdriven-dev">Kanak Sethi</a>
